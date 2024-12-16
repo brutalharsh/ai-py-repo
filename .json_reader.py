@@ -1,6 +1,3 @@
-Sure! Below is the Python script following the prompt to create a utility function for reading a JSON file and returning its contents as a Python dictionary with appropriate error handling and adherence to Python best practices.
-
-```python
 import json
 import os
 
@@ -38,6 +35,4 @@ if __name__ == "__main__":
         print("JSON file contents:", result)
     else:
         print("Failed to read JSON file.")
-```
 
-### Explanation:
