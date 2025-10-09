@@ -41,11 +41,11 @@ Example usage:
 
     # Copy a file
     fsm.copy('new_directory/example.txt', 'example_copy.txt')
-
 """
 
 import os
 import shutil
+from pathlib import Path
 
 
 def file_exists(file_path):
@@ -59,7 +59,7 @@ def file_exists(file_path):
     bool: True if the file exists, False otherwise.
     """
     try:
-        return os.path.isfile(file_path)
+        return Path(file_path).is_file()
     except Exception as e:
         print(f"Error checking if file exists: {e}")
         return False
@@ -76,7 +76,7 @@ def create_directory(directory_path):
     bool: True if the directory was created successfully, False otherwise.
     """
     try:
-        os.makedirs(directory_path, exist_ok=True)
+        Path(directory_path).mkdir(parents=True, exist_ok=True)
         return True
     except Exception as e:
         print(f"Error creating directory: {e}")
@@ -95,7 +95,7 @@ def write_to_file(file_path, content):
     bool: True if writing to the file was successful, False otherwise.
     """
     try:
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             file.write(content)
         return True
     except Exception as e:
@@ -114,7 +114,7 @@ def read_from_file(file_path):
     str: The content of the file, or None if an error occurred.
     """
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
     except Exception as e:
         print(f"Error reading from file: {e}")
@@ -134,6 +134,9 @@ def delete_file(file_path):
     try:
         os.remove(file_path)
         return True
+    except FileNotFoundError:
+        print(f"Error deleting file: {file_path} not found")
+        return False
     except Exception as e:
         print(f"Error deleting file: {e}")
         return False
@@ -151,6 +154,9 @@ def list_directory_contents(directory_path):
     """
     try:
         return os.listdir(directory_path)
+    except FileNotFoundError:
+        print(f"Error listing directory contents: {directory_path} not found")
+        return None
     except Exception as e:
         print(f"Error listing directory contents: {e}")
         return None
@@ -170,8 +176,11 @@ def move(src_path, dest_path):
     try:
         shutil.move(src_path, dest_path)
         return True
+    except FileNotFoundError:
+        print(f"Error moving: {src_path} not found")
+        return False
     except Exception as e:
-        print(f"Error moving file: {e}")
+        print(f"Error moving: {e}")
         return False
 
 
@@ -192,8 +201,52 @@ def copy(src_path, dest_path):
         else:
             shutil.copy2(src_path, dest_path)
         return True
+    except FileExistsError:
+        print(f"Error copying: {dest_path} already exists")
+        return False
+    except FileNotFoundError:
+        print(f"Error copying: {src_path} not found")
+        return False
     except Exception as e:
-        print(f"Error copying file: {e}")
+        print(f"Error copying: {e}")
+        return False
+
+
+def directory_exists(directory_path):
+    """
+    Check if a directory exists at the specified path.
+
+    Parameters:
+    directory_path (str): The path to the directory.
+
+    Returns:
+    bool: True if the directory exists, False otherwise.
+    """
+    try:
+        return Path(directory_path).is_dir()
+    except Exception as e:
+        print(f"Error checking if directory exists: {e}")
+        return False
+
+
+def delete_directory(directory_path):
+    """
+    Delete a directory at the specified path.
+
+    Parameters:
+    directory_path (str): The path to the directory.
+
+    Returns:
+    bool: True if the directory was deleted successfully, False otherwise.
+    """
+    try:
+        shutil.rmtree(directory_path)
+        return True
+    except FileNotFoundError:
+        print(f"Error deleting directory: {directory_path} not found")
+        return False
+    except Exception as e:
+        print(f"Error deleting directory: {e}")
         return False
 
 
@@ -201,7 +254,7 @@ if __name__ == "__main__":
     import file_system_manager as fsm
 
     # Example usage:
-    
+
     # Check if a file exists
     print(fsm.file_exists('example.txt'))
 
@@ -225,3 +278,9 @@ if __name__ == "__main__":
 
     # Copy a file
     print(fsm.copy('new_directory/example.txt', 'example_copy.txt'))
+
+    # Check if a directory exists
+    print(fsm.directory_exists('new_directory'))
+
+    # Delete a directory
+    print(fsm.delete_directory('new_directory'))
