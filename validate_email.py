@@ -9,20 +9,16 @@ def validate_email(email: str) -> bool:
 
     Returns:
         bool: True if the email address is valid, False otherwise.
-
-    Raises:
-        ValueError: If the email address is invalid.
     """
     # Regular expression pattern for validating an email address
-    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    pattern = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
     
-    if re.match(pattern, email):
-        return True
-    else:
-        raise ValueError(f"Invalid email address: {email}")
+    return bool(pattern.match(email))
 
-if __name__ == "__main__":
-    # Example usage
+def main():
+    """
+    Main function to validate a list of email addresses.
+    """
     emails = [
         "test@example.com",
         "invalid-email",
@@ -33,6 +29,12 @@ if __name__ == "__main__":
 
     for email in emails:
         try:
-            print(f"Validating {email}: {validate_email(email)}")
+            if validate_email(email):
+                print(f"Validating {email}: Valid")
+            else:
+                raise ValueError(f"Invalid email address: {email}")
         except ValueError as e:
             print(e)
+
+if __name__ == "__main__":
+    main()
