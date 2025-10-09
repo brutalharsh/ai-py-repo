@@ -2,6 +2,7 @@ import psutil
 import time
 import threading
 import os
+from datetime import datetime
 
 class SystemMonitor:
     """
@@ -32,14 +33,18 @@ class SystemMonitor:
         try:
             with open(self.log_file, 'a') as file:
                 while self._monitoring:
-                    cpu_usage = psutil.cpu_percent(interval=1)
-                    memory_usage = psutil.virtual_memory().percent
-                    log_entry = f"CPU: {cpu_usage}% | Memory: {memory_usage}%\n"
+                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    cpu_usage = psutil.cpu_percent(interval=None)
+                    memory_info = psutil.virtual_memory()
+                    memory_usage = memory_info.percent
+                    log_entry = f"{timestamp} | CPU: {cpu_usage}% | Memory: {memory_usage}% | Available Memory: {memory_info.available/1024**2:.2f} MB\n"
                     file.write(log_entry)
                     print(log_entry.strip())
-                    time.sleep(self.interval - 1)
+                    time.sleep(self.interval)
         except IOError as e:
             print(f"Error writing to log file: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
     def start(self):
         """
@@ -62,7 +67,10 @@ if __name__ == "__main__":
     monitor = SystemMonitor(log_file='system_usage.log', interval=5)
     try:
         monitor.start()
-        # Run the monitor for 30 seconds as an example
+        # Run the monitor indefinitely or for a specific period
         time.sleep(30)
+    except KeyboardInterrupt:
+        print("Monitoring interrupted by user.")
     finally:
         monitor.stop()
+        print("Monitoring stopped.")
