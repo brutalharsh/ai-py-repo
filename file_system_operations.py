@@ -1,120 +1,159 @@
 import os
 import shutil
+from typing import List, Optional
 
 class FileSystemTool:
     """
     A class to provide various file system operations.
     """
 
-    def list_directory_contents(self, path):
+    @staticmethod
+    def list_directory_contents(path: str) -> Optional[List[str]]:
         """
         List the contents of the specified directory.
-        
+
         :param path: The path to the directory to list contents of.
         :return: List of directory contents or None if an error occurs.
         """
+        if not os.path.isdir(path):
+            print(f"Error: {path} is not a valid directory.")
+            return None
         try:
-            contents = os.listdir(path)
-            return contents
-        except Exception as e:
+            return os.listdir(path)
+        except OSError as e:
             print(f"Error listing directory contents: {e}")
             return None
 
-    def create_file(self, path):
+    @staticmethod
+    def create_file(path: str) -> None:
         """
         Create a new file at the specified path.
-        
+
         :param path: The path where the new file should be created.
         """
         try:
-            with open(path, 'w'):
+            with open(path, 'x'):
                 pass
-        except Exception as e:
+        except FileExistsError:
+            print(f"Error: File {path} already exists.")
+        except OSError as e:
             print(f"Error creating file: {e}")
 
-    def create_directory(self, path):
+    @staticmethod
+    def create_directory(path: str) -> None:
         """
         Create a new directory at the specified path.
-        
+
         :param path: The path where the new directory should be created.
         """
         try:
-            os.makedirs(path)
-        except Exception as e:
+            os.makedirs(path, exist_ok=True)
+        except OSError as e:
             print(f"Error creating directory: {e}")
 
-    def delete_file(self, path):
+    @staticmethod
+    def delete_file(path: str) -> None:
         """
         Delete the file at the specified path.
-        
+
         :param path: The path of the file to be deleted.
         """
+        if not os.path.isfile(path):
+            print(f"Error: {path} is not a valid file.")
+            return
         try:
             os.remove(path)
-        except Exception as e:
+        except OSError as e:
             print(f"Error deleting file: {e}")
 
-    def delete_directory(self, path):
+    @staticmethod
+    def delete_directory(path: str) -> None:
         """
         Delete the directory at the specified path.
-        
+
         :param path: The path of the directory to be deleted.
         """
+        if not os.path.isdir(path):
+            print(f"Error: {path} is not a valid directory.")
+            return
         try:
             shutil.rmtree(path)
-        except Exception as e:
+        except OSError as e:
             print(f"Error deleting directory: {e}")
 
-    def read_file(self, path):
+    @staticmethod
+    def read_file(path: str) -> Optional[str]:
         """
         Read the contents of the file at the specified path.
-        
+
         :param path: The path of the file to be read.
         :return: Contents of the file or None if an error occurs.
         """
+        if not os.path.isfile(path):
+            print(f"Error: {path} is not a valid file.")
+            return None
         try:
             with open(path, 'r') as file:
                 return file.read()
-        except Exception as e:
+        except OSError as e:
             print(f"Error reading file: {e}")
             return None
 
-    def write_file(self, path, content):
+    @staticmethod
+    def write_file(path: str, content: str) -> None:
         """
         Write the specified content to the file at the specified path.
-        
+
         :param path: The path of the file to write to.
         :param content: The content to write to the file.
         """
         try:
             with open(path, 'w') as file:
                 file.write(content)
-        except Exception as e:
+        except OSError as e:
             print(f"Error writing to file: {e}")
 
-    def move_file(self, src, dest):
+    @staticmethod
+    def move_file(src: str, dest: str) -> None:
         """
         Move the file from the source path to the destination path.
-        
+
         :param src: The source path of the file.
         :param dest: The destination path of the file.
         """
+        if not os.path.isfile(src):
+            print(f"Error: {src} is not a valid file.")
+            return
         try:
             shutil.move(src, dest)
-        except Exception as e:
+        except OSError as e:
             print(f"Error moving file: {e}")
 
-    def copy_file(self, src, dest):
+    @staticmethod
+    def copy_file(src: str, dest: str) -> None:
         """
         Copy the file from the source path to the destination path.
-        
+
         :param src: The source path of the file.
         :param dest: The destination path of the file.
         """
+        if not os.path.isfile(src):
+            print(f"Error: {src} is not a valid file.")
+            return
         try:
             shutil.copy(src, dest)
-        except Exception as e:
+        except OSError as e:
             print(f"Error copying file: {e}")
+
+    @staticmethod
+    def check_path_exists(path: str) -> bool:
+        """
+        Check if a given path exists.
+
+        :param path: The path to check.
+        :return: True if the path exists, False otherwise.
+        """
+        return os.path.exists(path)
 
 if __name__ == "__main__":
     fs_tool = FileSystemTool()
@@ -147,3 +186,7 @@ if __name__ == "__main__":
 
     # Copy a file
     fs_tool.copy_file('/path/to/directory/file_to_copy.txt', '/new/path/to/directory')
+
+    # Check if a path exists
+    exists = fs_tool.check_path_exists('/path/to/directory')
+    print(f"Path exists: {exists}")
