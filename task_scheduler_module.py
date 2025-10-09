@@ -2,6 +2,7 @@ import schedule
 import time
 import logging
 from datetime import datetime
+from threading import Thread, Event
 
 # Setting up logging configuration
 logging.basicConfig(level=logging.INFO,
@@ -29,10 +30,10 @@ class TaskScheduler:
     
     def __init__(self):
         """
-        Initializes the TaskScheduler with an empty task list.
+        Initializes the TaskScheduler with an empty task list and an event to stop the scheduler.
         """
         self.tasks = []
-        self.scheduler_running = False
+        self.stop_event = Event()
 
     def add_task(self, task, schedule_time, *args, **kwargs):
         """
@@ -74,20 +75,32 @@ class TaskScheduler:
         interval : int, optional
             The interval time in seconds to check for scheduled tasks (default is 1).
         """
-        self.scheduler_running = True
-        logging.info("Scheduler started")
-        try:
-            while self.scheduler_running:
-                self.run_pending()
-                time.sleep(interval)
-        except Exception as e:
-            logging.error(f"Error in scheduler loop: {e}")
+        logging.info("Scheduler starting")
+        self.scheduler_thread = Thread(target=self._scheduler_loop, args=(interval,))
+        self.scheduler_thread.start()
+
+    def _scheduler_loop(self, interval):
+        """
+        The loop that runs the scheduler, checking for pending tasks at specified intervals.
+
+        Parameters
+        ----------
+        interval : int
+            The interval time in seconds to check for scheduled tasks.
+        """
+        logging.info("Scheduler loop started")
+        while not self.stop_event.is_set():
+            self.run_pending()
+            time.sleep(interval)
+        logging.info("Scheduler loop stopped")
 
     def stop_scheduler(self):
         """
         Stops the scheduler.
         """
-        self.scheduler_running = False
+        logging.info("Stopping scheduler...")
+        self.stop_event.set()
+        self.scheduler_thread.join()
         logging.info("Scheduler stopped")
 
 def example_task(message):
