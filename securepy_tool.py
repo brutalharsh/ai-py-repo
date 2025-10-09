@@ -26,7 +26,7 @@ class SecurePy:
             logger.info(f"Generated random key of length {length}")
             return key
         except Exception as e:
-            logger.error(f"Error generating random key: {e}")
+            logger.exception("Error generating random key")
             raise
 
     @staticmethod
@@ -48,7 +48,7 @@ class SecurePy:
             logger.info("Data encrypted successfully")
             return iv + ciphertext
         except Exception as e:
-            logger.error(f"Error encrypting data: {e}")
+            logger.exception("Error encrypting data")
             raise
 
     @staticmethod
@@ -71,7 +71,7 @@ class SecurePy:
             logger.info("Data decrypted successfully")
             return data
         except Exception as e:
-            logger.error(f"Error decrypting data: {e}")
+            logger.exception("Error decrypting data")
             raise
 
     @staticmethod
@@ -88,7 +88,7 @@ class SecurePy:
             logger.info("Data hashed successfully")
             return hash_hex
         except Exception as e:
-            logger.error(f"Error hashing data: {e}")
+            logger.exception("Error hashing data")
             raise
 
     @staticmethod
@@ -104,25 +104,29 @@ class SecurePy:
             logger.info(f"Generated salt of length {length}")
             return salt
         except Exception as e:
-            logger.error(f"Error generating salt: {e}")
+            logger.exception("Error generating salt")
             raise
 
     @staticmethod
-    def hash_password(password: str, salt: bytes) -> str:
+    def hash_password(password: str, salt: bytes, length: int = 32, N: int = 2**14, r: int = 8, p: int = 1) -> str:
         """
         Hash a password with a salt using scrypt.
 
         :param password: Password to be hashed.
         :param salt: Salt to be used in hashing.
+        :param length: Desired length of the hash (default is 32 bytes).
+        :param N: CPU/memory cost parameter (default is 2^14).
+        :param r: Block size parameter (default is 8).
+        :param p: Parallelization parameter (default is 1).
         :return: Hashed password.
         """
         try:
-            hashed_password = scrypt(password.encode(), salt, 32, N=2**14, r=8, p=1)
+            hashed_password = scrypt(password.encode(), salt, length, N=N, r=r, p=p)
             hashed_password_base64 = base64.b64encode(hashed_password).decode('utf-8')
             logger.info("Password hashed successfully")
             return hashed_password_base64
         except Exception as e:
-            logger.error(f"Error hashing password: {e}")
+            logger.exception("Error hashing password")
             raise
 
 if __name__ == "__main__":
@@ -153,4 +157,4 @@ if __name__ == "__main__":
         logger.info(f"Hashed Password: {hashed_password}")
 
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        logger.exception("An error occurred")
