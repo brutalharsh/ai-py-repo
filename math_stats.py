@@ -1,15 +1,18 @@
 import statistics
+from typing import Union, List
 
-def add(a, b):
+Number = Union[int, float]
+
+def add(a: Number, b: Number) -> Number:
     """
     Add two numbers.
 
     Parameters:
-    a (float or int): The first number.
-    b (float or int): The second number.
+    a (Number): The first number.
+    b (Number): The second number.
 
     Returns:
-    float or int: The sum of the two numbers.
+    Number: The sum of the two numbers.
 
     Raises:
     TypeError: If either of the inputs is not a number.
@@ -23,16 +26,16 @@ def add(a, b):
     return a + b
 
 
-def subtract(a, b):
+def subtract(a: Number, b: Number) -> Number:
     """
     Subtract the second number from the first.
 
     Parameters:
-    a (float or int): The first number.
-    b (float or int): The second number.
+    a (Number): The first number.
+    b (Number): The second number.
 
     Returns:
-    float or int: The result of the subtraction.
+    Number: The result of the subtraction.
 
     Raises:
     TypeError: If either of the inputs is not a number.
@@ -46,16 +49,16 @@ def subtract(a, b):
     return a - b
 
 
-def multiply(a, b):
+def multiply(a: Number, b: Number) -> Number:
     """
     Multiply two numbers.
 
     Parameters:
-    a (float or int): The first number.
-    b (float or int): The second number.
+    a (Number): The first number.
+    b (Number): The second number.
 
     Returns:
-    float or int: The product of the two numbers.
+    Number: The product of the two numbers.
 
     Raises:
     TypeError: If either of the inputs is not a number.
@@ -69,16 +72,16 @@ def multiply(a, b):
     return a * b
 
 
-def divide(a, b):
+def divide(a: Number, b: Number) -> Number:
     """
     Divide the first number by the second.
 
     Parameters:
-    a (float or int): The first number.
-    b (float or int): The second number.
+    a (Number): The first number.
+    b (Number): The second number.
 
     Returns:
-    float or int: The result of the division.
+    Number: The result of the division.
 
     Raises:
     TypeError: If either of the inputs is not a number.
@@ -95,12 +98,12 @@ def divide(a, b):
     return a / b
 
 
-def mean(data):
+def mean(data: List[Number]) -> float:
     """
     Calculate the mean of a list of numbers.
 
     Parameters:
-    data (list of float or int): The list of numbers.
+    data (List[Number]): The list of numbers.
 
     Returns:
     float: The mean of the numbers.
@@ -120,12 +123,12 @@ def mean(data):
     return statistics.mean(data)
 
 
-def median(data):
+def median(data: List[Number]) -> float:
     """
     Calculate the median of a list of numbers.
 
     Parameters:
-    data (list of float or int): The list of numbers.
+    data (List[Number]): The list of numbers.
 
     Returns:
     float: The median of the numbers.
@@ -145,15 +148,15 @@ def median(data):
     return statistics.median(data)
 
 
-def mode(data):
+def mode(data: List[Number]) -> Number:
     """
     Calculate the mode of a list of numbers.
 
     Parameters:
-    data (list of float or int): The list of numbers.
+    data (List[Number]): The list of numbers.
 
     Returns:
-    float or int: The mode of the numbers.
+    Number: The mode of the numbers.
 
     Raises:
     TypeError: If the input is not a list or if the list contains non-number elements.
@@ -173,12 +176,12 @@ def mode(data):
         raise ValueError(str(e))
 
 
-def variance(data):
+def variance(data: List[Number]) -> float:
     """
     Calculate the variance of a list of numbers.
 
     Parameters:
-    data (list of float or int): The list of numbers.
+    data (List[Number]): The list of numbers.
 
     Returns:
     float: The variance of the numbers.
@@ -196,6 +199,32 @@ def variance(data):
     if not data:
         raise ValueError("The list must not be empty.")
     return statistics.variance(data)
+
+
+def standard_deviation(data: List[Number]) -> float:
+    """
+    Calculate the standard deviation of a list of numbers.
+
+    Parameters:
+    data (List[Number]): The list of numbers.
+
+    Returns:
+    float: The standard deviation of the numbers.
+
+    Raises:
+    TypeError: If the input is not a list or if the list contains non-number elements.
+    ValueError: If the list is empty.
+
+    Example:
+    >>> standard_deviation([1, 2, 3, 4, 5])
+    1.5811388300841898
+    """
+    if not isinstance(data, list) or not all(isinstance(x, (int, float)) for x in data):
+        raise TypeError("Input must be a list of numbers.")
+    if not data:
+        raise ValueError("The list must not be empty.")
+    return statistics.stdev(data)
+
 
 if __name__ == "__main__":
     import doctest
