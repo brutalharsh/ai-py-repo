@@ -43,14 +43,38 @@ class APIClient:
         """
         try:
             response.raise_for_status()
+            return response.json()
         except HTTPError as http_err:
             logging.error(f'HTTP error occurred: {http_err}')
+            raise
+        except ValueError as json_err:
+            logging.error(f'JSON decode error: {json_err}')
             raise
         except Exception as err:
             logging.error(f'Other error occurred: {err}')
             raise
-        else:
-            return response.json()
+
+    def _request(self, method, endpoint, **kwargs):
+        """
+        Sends an HTTP request with the specified method to the given endpoint.
+
+        Args:
+            method (str): The HTTP method to use (e.g., 'GET', 'POST').
+            endpoint (str): The API endpoint to send the request to.
+
+        Returns:
+            dict: JSON response from the API.
+        """
+        url = f"{self.base_url}/{endpoint}"
+        try:
+            response = requests.request(method, url, headers=self.headers, timeout=self.timeout, **kwargs)
+            return self._handle_response(response)
+        except Timeout:
+            logging.error('The request timed out')
+            raise
+        except RequestException as req_err:
+            logging.error(f'Request exception occurred: {req_err}')
+            raise
 
     def get(self, endpoint, params=None):
         """
@@ -63,16 +87,7 @@ class APIClient:
         Returns:
             dict: JSON response from the API.
         """
-        url = f"{self.base_url}/{endpoint}"
-        try:
-            response = requests.get(url, headers=self.headers, params=params, timeout=self.timeout)
-            return self._handle_response(response)
-        except Timeout:
-            logging.error('The request timed out')
-            raise
-        except RequestException as req_err:
-            logging.error(f'Request exception occurred: {req_err}')
-            raise
+        return self._request('GET', endpoint, params=params)
 
     def post(self, endpoint, data=None):
         """
@@ -85,16 +100,7 @@ class APIClient:
         Returns:
             dict: JSON response from the API.
         """
-        url = f"{self.base_url}/{endpoint}"
-        try:
-            response = requests.post(url, headers=self.headers, json=data, timeout=self.timeout)
-            return self._handle_response(response)
-        except Timeout:
-            logging.error('The request timed out')
-            raise
-        except RequestException as req_err:
-            logging.error(f'Request exception occurred: {req_err}')
-            raise
+        return self._request('POST', endpoint, json=data)
 
     def put(self, endpoint, data=None):
         """
@@ -107,16 +113,7 @@ class APIClient:
         Returns:
             dict: JSON response from the API.
         """
-        url = f"{self.base_url}/{endpoint}"
-        try:
-            response = requests.put(url, headers=self.headers, json=data, timeout=self.timeout)
-            return self._handle_response(response)
-        except Timeout:
-            logging.error('The request timed out')
-            raise
-        except RequestException as req_err:
-            logging.error(f'Request exception occurred: {req_err}')
-            raise
+        return self._request('PUT', endpoint, json=data)
 
     def delete(self, endpoint):
         """
@@ -128,16 +125,7 @@ class APIClient:
         Returns:
             dict: JSON response from the API.
         """
-        url = f"{self.base_url}/{endpoint}"
-        try:
-            response = requests.delete(url, headers=self.headers, timeout=self.timeout)
-            return self._handle_response(response)
-        except Timeout:
-            logging.error('The request timed out')
-            raise
-        except RequestException as req_err:
-            logging.error(f'Request exception occurred: {req_err}')
-            raise
+        return self._request('DELETE', endpoint)
 
 
 if __name__ == "__main__":
