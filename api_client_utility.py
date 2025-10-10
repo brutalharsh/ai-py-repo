@@ -19,6 +19,8 @@ class APIClient:
         post(endpoint, data): Sends a POST request to the specified endpoint.
         put(endpoint, data): Sends a PUT request to the specified endpoint.
         delete(endpoint, params): Sends a DELETE request to the specified endpoint.
+        patch(endpoint, data): Sends a PATCH request to the specified endpoint.
+        head(endpoint, params): Sends a HEAD request to the specified endpoint.
     """
 
     def __init__(self, base_url, headers=None, auth=None):
@@ -39,12 +41,15 @@ class APIClient:
         try:
             response.raise_for_status()
         except HTTPError as http_err:
-            logging.error(f'HTTP error occurred: {http_err}')
+            logging.error(f'HTTP error occurred: {http_err} - Response: {response.text}')
             raise
         except Exception as err:
             logging.error(f'Other error occurred: {err}')
             raise
-        return response.json()
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
 
     def _request_with_retries(self, method, endpoint, retries=3, **kwargs):
         """Handles the request with retries for rate limiting."""
@@ -58,7 +63,7 @@ class APIClient:
                     sleep(2 ** attempt)  # Exponential backoff
                 else:
                     raise
-            except HTTPError:
+            except HTTPError as err:
                 if response.status_code in [429, 503]:  # Rate limit or service unavailable
                     logging.warning(f'Rate limit error, attempt {attempt + 1}')
                     if attempt < retries - 1:
@@ -67,6 +72,9 @@ class APIClient:
                         raise
                 else:
                     raise
+            except Exception as err:
+                logging.error(f'Unexpected error: {err}')
+                raise
 
     def get(self, endpoint, params=None):
         """
@@ -119,6 +127,32 @@ class APIClient:
             dict: The JSON response.
         """
         return self._request_with_retries('DELETE', endpoint, params=params)
+    
+    def patch(self, endpoint, data=None):
+        """
+        Sends a PATCH request to the specified endpoint.
+
+        Parameters:
+            endpoint (str): The API endpoint.
+            data (dict): The body data (optional).
+
+        Returns:
+            dict: The JSON response.
+        """
+        return self._request_with_retries('PATCH', endpoint, json=data)
+    
+    def head(self, endpoint, params=None):
+        """
+        Sends a HEAD request to the specified endpoint.
+
+        Parameters:
+            endpoint (str): The API endpoint.
+            params (dict): Query parameters (optional).
+
+        Returns:
+            dict: The headers from the response.
+        """
+        return self._request_with_retries('HEAD', endpoint, params=params)
 
 if __name__ == "__main__":
     # Example usage:
