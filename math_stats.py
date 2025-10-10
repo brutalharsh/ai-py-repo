@@ -226,6 +226,56 @@ def standard_deviation(data: List[Number]) -> float:
     return statistics.stdev(data)
 
 
+def harmonic_mean(data: List[Number]) -> float:
+    """
+    Calculate the harmonic mean of a list of numbers.
+
+    Parameters:
+    data (List[Number]): The list of numbers.
+
+    Returns:
+    float: The harmonic mean of the numbers.
+
+    Raises:
+    TypeError: If the input is not a list or if the list contains non-number elements.
+    ValueError: If the list is empty.
+
+    Example:
+    >>> harmonic_mean([1, 2, 3, 4, 5])
+    2.18978102189781
+    """
+    if not isinstance(data, list) or not all(isinstance(x, (int, float)) for x in data):
+        raise TypeError("Input must be a list of numbers.")
+    if not data:
+        raise ValueError("The list must not be empty.")
+    return statistics.harmonic_mean(data)
+
+
+def geometric_mean(data: List[Number]) -> float:
+    """
+    Calculate the geometric mean of a list of numbers.
+
+    Parameters:
+    data (List[Number]): The list of numbers.
+
+    Returns:
+    float: The geometric mean of the numbers.
+
+    Raises:
+    TypeError: If the input is not a list or if the list contains non-number elements.
+    ValueError: If the list is empty.
+
+    Example:
+    >>> geometric_mean([1, 2, 3, 4, 5])
+    2.6051710846973517
+    """
+    if not isinstance(data, list) or not all(isinstance(x, (int, float)) for x in data):
+        raise TypeError("Input must be a list of numbers.")
+    if not data:
+        raise ValueError("The list must not be empty.")
+    return statistics.geometric_mean(data)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
