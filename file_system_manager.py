@@ -46,31 +46,27 @@ Example usage:
 import os
 import shutil
 from pathlib import Path
+from typing import Union, List, Optional
 
-
-def file_exists(file_path):
+def file_exists(file_path: Union[str, Path]) -> bool:
     """
     Check if a file exists at the specified path.
 
     Parameters:
-    file_path (str): The path to the file.
+    file_path (Union[str, Path]): The path to the file.
 
     Returns:
     bool: True if the file exists, False otherwise.
     """
-    try:
-        return Path(file_path).is_file()
-    except Exception as e:
-        print(f"Error checking if file exists: {e}")
-        return False
+    return Path(file_path).is_file()
 
 
-def create_directory(directory_path):
+def create_directory(directory_path: Union[str, Path]) -> bool:
     """
     Create a directory at the specified path.
 
     Parameters:
-    directory_path (str): The path to the directory.
+    directory_path (Union[str, Path]): The path to the directory.
 
     Returns:
     bool: True if the directory was created successfully, False otherwise.
@@ -83,12 +79,12 @@ def create_directory(directory_path):
         return False
 
 
-def write_to_file(file_path, content):
+def write_to_file(file_path: Union[str, Path], content: str) -> bool:
     """
     Write content to a file.
 
     Parameters:
-    file_path (str): The path to the file.
+    file_path (Union[str, Path]): The path to the file.
     content (str): The content to write to the file.
 
     Returns:
@@ -103,15 +99,15 @@ def write_to_file(file_path, content):
         return False
 
 
-def read_from_file(file_path):
+def read_from_file(file_path: Union[str, Path]) -> Optional[str]:
     """
     Read content from a file.
 
     Parameters:
-    file_path (str): The path to the file.
+    file_path (Union[str, Path]): The path to the file.
 
     Returns:
-    str: The content of the file, or None if an error occurred.
+    Optional[str]: The content of the file, or None if an error occurred.
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -121,12 +117,12 @@ def read_from_file(file_path):
         return None
 
 
-def delete_file(file_path):
+def delete_file(file_path: Union[str, Path]) -> bool:
     """
     Delete a file at the specified path.
 
     Parameters:
-    file_path (str): The path to the file.
+    file_path (Union[str, Path]): The path to the file.
 
     Returns:
     bool: True if the file was deleted successfully, False otherwise.
@@ -142,15 +138,15 @@ def delete_file(file_path):
         return False
 
 
-def list_directory_contents(directory_path):
+def list_directory_contents(directory_path: Union[str, Path]) -> Optional[List[str]]:
     """
     List the contents of a directory.
 
     Parameters:
-    directory_path (str): The path to the directory.
+    directory_path (Union[str, Path]): The path to the directory.
 
     Returns:
-    list: A list of the names of the entries in the directory, or None if an error occurred.
+    Optional[List[str]]: A list of the names of the entries in the directory, or None if an error occurred.
     """
     try:
         return os.listdir(directory_path)
@@ -162,13 +158,13 @@ def list_directory_contents(directory_path):
         return None
 
 
-def move(src_path, dest_path):
+def move(src_path: Union[str, Path], dest_path: Union[str, Path]) -> bool:
     """
     Move a file or directory to a new location.
 
     Parameters:
-    src_path (str): The source path.
-    dest_path (str): The destination path.
+    src_path (Union[str, Path]): The source path.
+    dest_path (Union[str, Path]): The destination path.
 
     Returns:
     bool: True if the move was successful, False otherwise.
@@ -184,19 +180,19 @@ def move(src_path, dest_path):
         return False
 
 
-def copy(src_path, dest_path):
+def copy(src_path: Union[str, Path], dest_path: Union[str, Path]) -> bool:
     """
     Copy a file or directory to a new location.
 
     Parameters:
-    src_path (str): The source path.
-    dest_path (str): The destination path.
+    src_path (Union[str, Path]): The source path.
+    dest_path (Union[str, Path]): The destination path.
 
     Returns:
     bool: True if the copy was successful, False otherwise.
     """
     try:
-        if os.path.isdir(src_path):
+        if Path(src_path).is_dir():
             shutil.copytree(src_path, dest_path)
         else:
             shutil.copy2(src_path, dest_path)
@@ -212,29 +208,25 @@ def copy(src_path, dest_path):
         return False
 
 
-def directory_exists(directory_path):
+def directory_exists(directory_path: Union[str, Path]) -> bool:
     """
     Check if a directory exists at the specified path.
 
     Parameters:
-    directory_path (str): The path to the directory.
+    directory_path (Union[str, Path]): The path to the directory.
 
     Returns:
     bool: True if the directory exists, False otherwise.
     """
-    try:
-        return Path(directory_path).is_dir()
-    except Exception as e:
-        print(f"Error checking if directory exists: {e}")
-        return False
+    return Path(directory_path).is_dir()
 
 
-def delete_directory(directory_path):
+def delete_directory(directory_path: Union[str, Path]) -> bool:
     """
     Delete a directory at the specified path.
 
     Parameters:
-    directory_path (str): The path to the directory.
+    directory_path (Union[str, Path]): The path to the directory.
 
     Returns:
     bool: True if the directory was deleted successfully, False otherwise.
@@ -248,6 +240,43 @@ def delete_directory(directory_path):
     except Exception as e:
         print(f"Error deleting directory: {e}")
         return False
+
+
+def append_to_file(file_path: Union[str, Path], content: str) -> bool:
+    """
+    Append content to a file.
+
+    Parameters:
+    file_path (Union[str, Path]): The path to the file.
+    content (str): The content to append to the file.
+
+    Returns:
+    bool: True if appending to the file was successful, False otherwise.
+    """
+    try:
+        with open(file_path, 'a', encoding='utf-8') as file:
+            file.write(content)
+        return True
+    except Exception as e:
+        print(f"Error appending to file: {e}")
+        return False
+
+
+def get_file_size(file_path: Union[str, Path]) -> Optional[int]:
+    """
+    Get the size of a file in bytes.
+
+    Parameters:
+    file_path (Union[str, Path]): The path to the file.
+
+    Returns:
+    Optional[int]: The size of the file in bytes, or None if an error occurred.
+    """
+    try:
+        return os.path.getsize(file_path)
+    except Exception as e:
+        print(f"Error getting file size: {e}")
+        return None
 
 
 if __name__ == "__main__":
@@ -284,3 +313,9 @@ if __name__ == "__main__":
 
     # Delete a directory
     print(fsm.delete_directory('new_directory'))
+
+    # Append to a file
+    print(fsm.append_to_file('example.txt', 'Append this text.'))
+
+    # Get file size
+    print(fsm.get_file_size('example.txt'))
