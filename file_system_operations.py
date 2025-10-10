@@ -114,6 +114,20 @@ class FileSystemTool:
             print(f"Error writing to file: {e}")
 
     @staticmethod
+    def append_to_file(path: str, content: str) -> None:
+        """
+        Append the specified content to the file at the specified path.
+
+        :param path: The path of the file to append to.
+        :param content: The content to append to the file.
+        """
+        try:
+            with open(path, 'a') as file:
+                file.write(content)
+        except OSError as e:
+            print(f"Error appending to file: {e}")
+
+    @staticmethod
     def move_file(src: str, dest: str) -> None:
         """
         Move the file from the source path to the destination path.
@@ -154,6 +168,45 @@ class FileSystemTool:
         :return: True if the path exists, False otherwise.
         """
         return os.path.exists(path)
+    
+    @staticmethod
+    def get_file_size(path: str) -> Optional[int]:
+        """
+        Get the size of the file at the specified path.
+
+        :param path: The path of the file.
+        :return: Size of the file in bytes or None if an error occurs.
+        """
+        if not os.path.isfile(path):
+            print(f"Error: {path} is not a valid file.")
+            return None
+        try:
+            return os.path.getsize(path)
+        except OSError as e:
+            print(f"Error getting file size: {e}")
+            return None
+
+    @staticmethod
+    def get_directory_size(path: str) -> Optional[int]:
+        """
+        Get the size of the directory at the specified path.
+
+        :param path: The path of the directory.
+        :return: Size of the directory in bytes or None if an error occurs.
+        """
+        if not os.path.isdir(path):
+            print(f"Error: {path} is not a valid directory.")
+            return None
+        total_size = 0
+        try:
+            for dirpath, dirnames, filenames in os.walk(path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            return total_size
+        except OSError as e:
+            print(f"Error getting directory size: {e}")
+            return None
 
 if __name__ == "__main__":
     fs_tool = FileSystemTool()
@@ -181,6 +234,9 @@ if __name__ == "__main__":
     # Write to a file
     fs_tool.write_file('/path/to/directory/file_to_write.txt', 'Hello, World!')
 
+    # Append to a file
+    fs_tool.append_to_file('/path/to/directory/file_to_append.txt', 'Appended content')
+
     # Move a file
     fs_tool.move_file('/path/to/directory/file_to_move.txt', '/new/path/to/directory')
 
@@ -190,3 +246,11 @@ if __name__ == "__main__":
     # Check if a path exists
     exists = fs_tool.check_path_exists('/path/to/directory')
     print(f"Path exists: {exists}")
+
+    # Get file size
+    file_size = fs_tool.get_file_size('/path/to/directory/file_to_check.txt')
+    print(f"File size: {file_size} bytes")
+
+    # Get directory size
+    dir_size = fs_tool.get_directory_size('/path/to/directory')
+    print(f"Directory size: {dir_size} bytes")
