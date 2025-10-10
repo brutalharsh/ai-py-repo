@@ -22,7 +22,8 @@ class Logger:
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(log_level)
-        
+        self.logger.propagate = False  # Prevent logging from propagating to the root logger
+
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         
         # Console handler
@@ -36,50 +37,36 @@ class Logger:
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
     
-    def debug(self, msg: str):
+    def _log(self, level: int, msg: str):
         """
-        Logs a debug message.
+        Logs a message with the given level.
 
         Args:
+            level (int): The logging level.
             msg (str): The message to log.
         """
-        self.logger.debug(msg)
+        if self.logger.isEnabledFor(level):
+            self.logger.log(level, msg)
+    
+    def debug(self, msg: str):
+        """Logs a debug message."""
+        self._log(logging.DEBUG, msg)
     
     def info(self, msg: str):
-        """
-        Logs an informational message.
-
-        Args:
-            msg (str): The message to log.
-        """
-        self.logger.info(msg)
+        """Logs an informational message."""
+        self._log(logging.INFO, msg)
     
     def warning(self, msg: str):
-        """
-        Logs a warning message.
-
-        Args:
-            msg (str): The message to log.
-        """
-        self.logger.warning(msg)
+        """Logs a warning message."""
+        self._log(logging.WARNING, msg)
     
     def error(self, msg: str):
-        """
-        Logs an error message.
-
-        Args:
-            msg (str): The message to log.
-        """
-        self.logger.error(msg)
+        """Logs an error message."""
+        self._log(logging.ERROR, msg)
     
     def critical(self, msg: str):
-        """
-        Logs a critical message.
-
-        Args:
-            msg (str): The message to log.
-        """
-        self.logger.critical(msg)
+        """Logs a critical message."""
+        self._log(logging.CRITICAL, msg)
     
     def log_exception(self, exc: Exception):
         """
