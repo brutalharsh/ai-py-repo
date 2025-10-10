@@ -34,6 +34,7 @@ class TaskScheduler:
         """
         self.tasks = []
         self.stop_event = Event()
+        self.scheduler_thread = None
 
     def add_task(self, task, schedule_time, *args, **kwargs):
         """
@@ -54,6 +55,8 @@ class TaskScheduler:
             job = eval(f"schedule.{schedule_time}.do(task, *args, **kwargs)")
             self.tasks.append(job)
             logging.info(f"Task {task.__name__} scheduled to run {schedule_time}")
+        except NameError as e:
+            logging.error(f"Error scheduling task: invalid schedule_time format. {e}")
         except Exception as e:
             logging.error(f"Error scheduling task: {e}")
 
@@ -75,6 +78,10 @@ class TaskScheduler:
         interval : int, optional
             The interval time in seconds to check for scheduled tasks (default is 1).
         """
+        if self.scheduler_thread and self.scheduler_thread.is_alive():
+            logging.warning("Scheduler is already running")
+            return
+        
         logging.info("Scheduler starting")
         self.scheduler_thread = Thread(target=self._scheduler_loop, args=(interval,))
         self.scheduler_thread.start()
@@ -98,9 +105,14 @@ class TaskScheduler:
         """
         Stops the scheduler.
         """
+        if not self.scheduler_thread or not self.scheduler_thread.is_alive():
+            logging.warning("Scheduler is not running")
+            return
+        
         logging.info("Stopping scheduler...")
         self.stop_event.set()
         self.scheduler_thread.join()
+        self.scheduler_thread = None
         logging.info("Scheduler stopped")
 
 def example_task(message):
