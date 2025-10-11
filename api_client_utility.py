@@ -21,6 +21,7 @@ class APIClient:
         delete(endpoint, params): Sends a DELETE request to the specified endpoint.
         patch(endpoint, data): Sends a PATCH request to the specified endpoint.
         head(endpoint, params): Sends a HEAD request to the specified endpoint.
+        options(endpoint, params): Sends an OPTIONS request to the specified endpoint.
     """
 
     def __init__(self, base_url, headers=None, auth=None):
@@ -64,7 +65,7 @@ class APIClient:
                 else:
                     raise
             except HTTPError as err:
-                if response.status_code in [429, 503]:  # Rate limit or service unavailable
+                if err.response.status_code in [429, 503]:  # Rate limit or service unavailable
                     logging.warning(f'Rate limit error, attempt {attempt + 1}')
                     if attempt < retries - 1:
                         sleep(2 ** attempt)  # Exponential backoff
@@ -153,6 +154,19 @@ class APIClient:
             dict: The headers from the response.
         """
         return self._request_with_retries('HEAD', endpoint, params=params)
+
+    def options(self, endpoint, params=None):
+        """
+        Sends an OPTIONS request to the specified endpoint.
+
+        Parameters:
+            endpoint (str): The API endpoint.
+            params (dict): Query parameters (optional).
+
+        Returns:
+            dict: The JSON response.
+        """
+        return self._request_with_retries('OPTIONS', endpoint, params=params)
 
 if __name__ == "__main__":
     # Example usage:
