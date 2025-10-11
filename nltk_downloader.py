@@ -4,17 +4,19 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import logging
 
+logging.basicConfig(level=logging.INFO)
+
 def download_nltk_resources():
     """
     Download the required NLTK resources: wordnet, punkt, and stopwords.
     """
-    try:
-        nltk.download('wordnet')
-        nltk.download('punkt')
-        nltk.download('stopwords')
-        print("All NLTK resources downloaded successfully.")
-    except Exception as e:
-        logging.error(f"Error downloading NLTK resources: {e}")
+    resources = ['wordnet', 'punkt', 'stopwords']
+    for resource in resources:
+        try:
+            nltk.download(resource)
+            logging.info(f"NLTK resource '{resource}' downloaded successfully.")
+        except Exception as e:
+            logging.error(f"Error downloading NLTK resource '{resource}': {e}")
 
 def get_synonyms(word):
     """
@@ -26,15 +28,14 @@ def get_synonyms(word):
     Returns:
     list: A list of synonyms.
     """
+    synonyms = set()
     try:
-        synonyms = []
         for syn in wn.synsets(word):
             for lemma in syn.lemmas():
-                synonyms.append(lemma.name())
-        return list(set(synonyms))
+                synonyms.add(lemma.name())
     except Exception as e:
         logging.error(f"Error getting synonyms for word '{word}': {e}")
-        return []
+    return list(synonyms)
 
 def tokenize_text(text):
     """
@@ -47,8 +48,7 @@ def tokenize_text(text):
     list: A list of tokens.
     """
     try:
-        tokens = word_tokenize(text)
-        return tokens
+        return word_tokenize(text)
     except Exception as e:
         logging.error(f"Error tokenizing text: {e}")
         return []
@@ -65,23 +65,32 @@ def remove_stopwords(tokens):
     """
     try:
         stop_words = set(stopwords.words('english'))
-        filtered_tokens = [token for token in tokens if token.lower() not in stop_words]
-        return filtered_tokens
+        return [token for token in tokens if token.lower() not in stop_words]
     except Exception as e:
         logging.error(f"Error removing stopwords: {e}")
         return []
+
+def text_preprocessing(text):
+    """
+    Perform a full text preprocessing pipeline including tokenization and stopword removal.
+
+    Parameters:
+    text (str): The text to preprocess.
+
+    Returns:
+    list: A list of cleaned tokens.
+    """
+    tokens = tokenize_text(text)
+    return remove_stopwords(tokens)
 
 if __name__ == "__main__":
     # Example usage
     download_nltk_resources()
     
     example_text = "This is a simple example sentence for testing NLTK functionalities."
-    tokens = tokenize_text(example_text)
-    print("Tokens:", tokens)
-    
-    filtered_tokens = remove_stopwords(tokens)
-    print("Filtered Tokens:", filtered_tokens)
+    cleaned_tokens = text_preprocessing(example_text)
+    logging.info(f"Cleaned Tokens: {cleaned_tokens}")
     
     example_word = "simple"
     synonyms = get_synonyms(example_word)
-    print(f"Synonyms for '{example_word}':", synonyms)
+    logging.info(f"Synonyms for '{example_word}': {synonyms}")
