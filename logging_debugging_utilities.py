@@ -8,10 +8,10 @@ class Logger:
     messages and debugging information.
 
     Attributes:
-    logger (logging.Logger): The root logger instance.
+        logger (logging.Logger): The root logger instance.
     """
 
-    def __init__(self, name: str, log_file: str = None, log_level: int = logging.DEBUG):
+    def __init__(self, name: str, log_file: str = None, log_level: int = logging.DEBUG, max_bytes: int = 10485760, backup_count: int = 5):
         """
         Initializes the Logger instance.
 
@@ -19,24 +19,26 @@ class Logger:
             name (str): The name of the logger.
             log_file (str, optional): The file to log messages to. Defaults to None.
             log_level (int, optional): The logging level. Defaults to logging.DEBUG.
+            max_bytes (int, optional): Maximum size in bytes of the log file before it gets rotated. Defaults to 10485760 (10MB).
+            backup_count (int, optional): Number of backup files to keep. Defaults to 5.
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(log_level)
         self.logger.propagate = False  # Prevent logging from propagating to the root logger
 
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        
+
         # Console handler
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(formatter)
         self.logger.addHandler(console_handler)
-        
+
         # File handler
         if log_file:
-            file_handler = RotatingFileHandler(log_file, maxBytes=10485760, backupCount=5)
+            file_handler = RotatingFileHandler(log_file, maxBytes=max_bytes, backupCount=backup_count)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
-    
+
     def _log(self, level: int, msg: str):
         """
         Logs a message with the given level.
@@ -47,27 +49,27 @@ class Logger:
         """
         if self.logger.isEnabledFor(level):
             self.logger.log(level, msg)
-    
+
     def debug(self, msg: str):
         """Logs a debug message."""
         self._log(logging.DEBUG, msg)
-    
+
     def info(self, msg: str):
         """Logs an informational message."""
         self._log(logging.INFO, msg)
-    
+
     def warning(self, msg: str):
         """Logs a warning message."""
         self._log(logging.WARNING, msg)
-    
+
     def error(self, msg: str):
         """Logs an error message."""
         self._log(logging.ERROR, msg)
-    
+
     def critical(self, msg: str):
         """Logs a critical message."""
         self._log(logging.CRITICAL, msg)
-    
+
     def log_exception(self, exc: Exception):
         """
         Logs an exception with the stack trace.
@@ -75,11 +77,21 @@ class Logger:
         Args:
             exc (Exception): The exception to log.
         """
-        self.logger.error(f"Exception occurred: {exc}")
-        self.logger.error(traceback.format_exc())
+        self.logger.error("Exception occurred", exc_info=True)
+
+    @staticmethod
+    def set_global_log_level(level: int):
+        """
+        Sets the global logging level.
+
+        Args:
+            level (int): The logging level to set globally.
+        """
+        logging.basicConfig(level=level)
 
 if __name__ == "__main__":
     # Example usage
+    Logger.set_global_log_level(logging.DEBUG)
     logger = Logger("MyLogger", log_file="app.log", log_level=logging.DEBUG)
     try:
         logger.debug("This is a debug message")
@@ -87,7 +99,7 @@ if __name__ == "__main__":
         logger.warning("This is a warning message")
         logger.error("This is an error message")
         logger.critical("This is a critical message")
-        
+
         # Simulate an exception
         1 / 0
     except Exception as e:
