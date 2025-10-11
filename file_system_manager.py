@@ -48,6 +48,7 @@ import shutil
 from pathlib import Path
 from typing import Union, List, Optional
 
+
 def file_exists(file_path: Union[str, Path]) -> bool:
     """
     Check if a file exists at the specified path.
@@ -279,6 +280,75 @@ def get_file_size(file_path: Union[str, Path]) -> Optional[int]:
         return None
 
 
+# New Features
+
+def is_symlink(file_path: Union[str, Path]) -> bool:
+    """
+    Check if the given path is a symbolic link.
+
+    Parameters:
+    file_path (Union[str, Path]): The path to check.
+
+    Returns:
+    bool: True if the path is a symbolic link, False otherwise.
+    """
+    return Path(file_path).is_symlink()
+
+
+def create_symlink(src_path: Union[str, Path], dest_path: Union[str, Path]) -> bool:
+    """
+    Create a symbolic link pointing to src_path named dest_path.
+
+    Parameters:
+    src_path (Union[str, Path]): The source path.
+    dest_path (Union[str, Path]): The destination path.
+
+    Returns:
+    bool: True if the symlink was created successfully, False otherwise.
+    """
+    try:
+        Path(dest_path).symlink_to(src_path)
+        return True
+    except Exception as e:
+        print(f"Error creating symlink: {e}")
+        return False
+
+
+def read_lines_from_file(file_path: Union[str, Path]) -> Optional[List[str]]:
+    """
+    Read lines from a file.
+
+    Parameters:
+    file_path (Union[str, Path]): The path to the file.
+
+    Returns:
+    Optional[List[str]]: A list of lines from the file, or None if an error occurred.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.readlines()
+    except Exception as e:
+        print(f"Error reading lines from file: {e}")
+        return None
+
+
+def count_files_in_directory(directory_path: Union[str, Path]) -> Optional[int]:
+    """
+    Count the number of files in a directory.
+
+    Parameters:
+    directory_path (Union[str, Path]): The path to the directory.
+
+    Returns:
+    Optional[int]: The number of files in the directory, or None if an error occurred.
+    """
+    try:
+        return len([entry for entry in Path(directory_path).iterdir() if entry.is_file()])
+    except Exception as e:
+        print(f"Error counting files in directory: {e}")
+        return None
+
+
 if __name__ == "__main__":
     import file_system_manager as fsm
 
@@ -319,3 +389,15 @@ if __name__ == "__main__":
 
     # Get file size
     print(fsm.get_file_size('example.txt'))
+
+    # Check if a path is a symlink
+    print(fsm.is_symlink('example_symlink.txt'))
+
+    # Create a symlink
+    print(fsm.create_symlink('example.txt', 'example_symlink.txt'))
+
+    # Read lines from a file
+    print(fsm.read_lines_from_file('example.txt'))
+
+    # Count files in a directory
+    print(fsm.count_files_in_directory('.'))
