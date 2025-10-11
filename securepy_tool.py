@@ -20,6 +20,7 @@ class SecurePy:
 
         :param length: Length of the key in bytes (default is 32).
         :return: Secure random key.
+        :raises ValueError: If length is not a positive integer.
         """
         if length <= 0:
             raise ValueError("Key length must be a positive integer.")
@@ -35,17 +36,25 @@ class SecurePy:
         :param data: Data to be encrypted.
         :param key: Encryption key.
         :return: Encrypted data (IV + ciphertext).
+        :raises ValueError: If data or key is empty.
         """
         if not data or not key:
             raise ValueError("Data and key must not be empty.")
+        
         cipher = AES.new(key, AES.MODE_CBC)
         iv = cipher.iv
+
         # Padding data to be multiple of AES block size
         padding_length = AES.block_size - len(data) % AES.block_size
         data += bytes([padding_length]) * padding_length
-        ciphertext = cipher.encrypt(data)
-        logger.info("Data encrypted successfully")
-        return iv + ciphertext
+
+        try:
+            ciphertext = cipher.encrypt(data)
+            logger.info("Data encrypted successfully")
+            return iv + ciphertext
+        except Exception as e:
+            logger.exception("Encryption failed")
+            raise
 
     @staticmethod
     def decrypt_data(encrypted_data: bytes, key: bytes) -> bytes:
@@ -55,22 +64,29 @@ class SecurePy:
         :param encrypted_data: Data to be decrypted (IV + ciphertext).
         :param key: Decryption key.
         :return: Decrypted data.
+        :raises ValueError: If encrypted data or key is empty, or if padding is incorrect.
         """
         if not encrypted_data or not key:
             raise ValueError("Encrypted data and key must not be empty.")
         if len(encrypted_data) < AES.block_size:
             raise ValueError("Invalid encrypted data.")
+        
         iv = encrypted_data[:AES.block_size]
         ciphertext = encrypted_data[AES.block_size:]
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        data = cipher.decrypt(ciphertext)
-        # Remove padding
-        padding_length = data[-1]
-        if padding_length > AES.block_size:
-            raise ValueError("Invalid padding length.")
-        data = data[:-padding_length]
-        logger.info("Data decrypted successfully")
-        return data
+
+        try:
+            data = cipher.decrypt(ciphertext)
+            # Remove padding
+            padding_length = data[-1]
+            if padding_length > AES.block_size:
+                raise ValueError("Invalid padding length.")
+            data = data[:-padding_length]
+            logger.info("Data decrypted successfully")
+            return data
+        except Exception as e:
+            logger.exception("Decryption failed")
+            raise
 
     @staticmethod
     def hash_data(data: bytes) -> str:
@@ -79,13 +95,19 @@ class SecurePy:
 
         :param data: Data to be hashed.
         :return: SHA-256 hash of the data.
+        :raises ValueError: If data is empty.
         """
         if not data:
             raise ValueError("Data must not be empty.")
-        hash_object = hashlib.sha256(data)
-        hash_hex = hash_object.hexdigest()
-        logger.info("Data hashed successfully")
-        return hash_hex
+        
+        try:
+            hash_object = hashlib.sha256(data)
+            hash_hex = hash_object.hexdigest()
+            logger.info("Data hashed successfully")
+            return hash_hex
+        except Exception as e:
+            logger.exception("Hashing failed")
+            raise
 
     @staticmethod
     def generate_salt(length: int = 16) -> bytes:
@@ -94,12 +116,18 @@ class SecurePy:
 
         :param length: Length of the salt in bytes (default is 16).
         :return: Secure random salt.
+        :raises ValueError: If length is not a positive integer.
         """
         if length <= 0:
             raise ValueError("Salt length must be a positive integer.")
-        salt = get_random_bytes(length)
-        logger.info(f"Generated salt of length {length}")
-        return salt
+        
+        try:
+            salt = get_random_bytes(length)
+            logger.info(f"Generated salt of length {length}")
+            return salt
+        except Exception as e:
+            logger.exception("Salt generation failed")
+            raise
 
     @staticmethod
     def hash_password(password: str, salt: bytes, length: int = 32, N: int = 2**14, r: int = 8, p: int = 1) -> str:
@@ -113,15 +141,21 @@ class SecurePy:
         :param r: Block size parameter (default is 8).
         :param p: Parallelization parameter (default is 1).
         :return: Hashed password.
+        :raises ValueError: If password, salt, or length are invalid.
         """
         if not password or not salt:
             raise ValueError("Password and salt must not be empty.")
         if length <= 0:
             raise ValueError("Hash length must be a positive integer.")
-        hashed_password = scrypt(password.encode(), salt, length, N=N, r=r, p=p)
-        hashed_password_base64 = base64.b64encode(hashed_password).decode('utf-8')
-        logger.info("Password hashed successfully")
-        return hashed_password_base64
+        
+        try:
+            hashed_password = scrypt(password.encode(), salt, length, N=N, r=r, p=p)
+            hashed_password_base64 = base64.b64encode(hashed_password).decode('utf-8')
+            logger.info("Password hashed successfully")
+            return hashed_password_base64
+        except Exception as e:
+            logger.exception("Password hashing failed")
+            raise
 
 if __name__ == "__main__":
     # Example usage
@@ -132,11 +166,11 @@ if __name__ == "__main__":
         # Encrypt data
         data = b"Secret Data"
         encrypted_data = SecurePy.encrypt_data(data, key)
-        logger.info(f"Encrypted Data: {encrypted_data}")
+        logger.info(f"Encrypted Data: {base64.b64encode(encrypted_data).decode('utf-8')}")
 
         # Decrypt data
         decrypted_data = SecurePy.decrypt_data(encrypted_data, key)
-        logger.info(f"Decrypted Data: {decrypted_data}")
+        logger.info(f"Decrypted Data: {decrypted_data.decode('utf-8')}")
 
         # Hash data
         data_hash = SecurePy.hash_data(data)
