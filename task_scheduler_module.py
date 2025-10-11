@@ -26,13 +26,15 @@ class TaskScheduler:
     
     stop_scheduler()
         Stops the scheduler.
+    
+    clear_tasks()
+        Clears all scheduled tasks.
     """
     
     def __init__(self):
         """
         Initializes the TaskScheduler with an empty task list and an event to stop the scheduler.
         """
-        self.tasks = []
         self.stop_event = Event()
         self.scheduler_thread = None
 
@@ -52,8 +54,8 @@ class TaskScheduler:
             Additional keyword arguments to pass to the task function.
         """
         try:
-            job = eval(f"schedule.{schedule_time}.do(task, *args, **kwargs)")
-            self.tasks.append(job)
+            schedule_code = f"schedule.{schedule_time}.do(task, *args, **kwargs)"
+            job = eval(schedule_code, {"schedule": schedule, "task": task, "args": args, "kwargs": kwargs})
             logging.info(f"Task {task.__name__} scheduled to run {schedule_time}")
         except NameError as e:
             logging.error(f"Error scheduling task: invalid schedule_time format. {e}")
@@ -113,7 +115,15 @@ class TaskScheduler:
         self.stop_event.set()
         self.scheduler_thread.join()
         self.scheduler_thread = None
+        self.stop_event.clear()
         logging.info("Scheduler stopped")
+
+    def clear_tasks(self):
+        """
+        Clears all scheduled tasks.
+        """
+        schedule.clear()
+        logging.info("All scheduled tasks cleared")
 
 def example_task(message):
     """
@@ -138,3 +148,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Stop the scheduler on user interrupt
         scheduler.stop_scheduler()
+    finally:
+        # Ensure all tasks are cleared
+        scheduler.clear_tasks()
