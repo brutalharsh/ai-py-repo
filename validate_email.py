@@ -13,7 +13,7 @@ def validate_email(email: str) -> bool:
     """
     # Regular expression pattern for validating an email address
     pattern = re.compile(
-        r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        r'^(?!.*?[.]{2})[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
     )
     
     return bool(pattern.match(email))
@@ -28,7 +28,11 @@ def validate_email_list(emails: List[str]) -> List[str]:
     Returns:
         List[str]: A list containing invalid email addresses.
     """
-    return [email for email in emails if not validate_email(email)]
+    invalid_emails = []
+    for email in emails:
+        if not validate_email(email):
+            invalid_emails.append(email)
+    return invalid_emails
 
 def main():
     """
@@ -39,17 +43,20 @@ def main():
         "invalid-email",
         "another.test@domain.co",
         "no-at-symbol.com",
-        "special+chars@domain.com"
+        "special+chars@domain.com",
+        "double..dot@domain.com"
     ]
 
-    invalid_emails = validate_email_list(emails)
-
-    if invalid_emails:
-        print("The following email addresses are invalid:")
-        for email in invalid_emails:
-            print(f" - {email}")
-    else:
-        print("All email addresses are valid.")
+    try:
+        invalid_emails = validate_email_list(emails)
+        if invalid_emails:
+            print("The following email addresses are invalid:")
+            for email in invalid_emails:
+                print(f" - {email}")
+        else:
+            print("All email addresses are valid.")
+    except Exception as e:
+        print(f"An error occurred during validation: {e}")
 
 if __name__ == "__main__":
     main()
