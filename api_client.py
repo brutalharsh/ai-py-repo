@@ -127,6 +127,45 @@ class APIClient:
         """
         return self._request('DELETE', endpoint)
 
+    def patch(self, endpoint, data=None):
+        """
+        Sends a PATCH request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to send the PATCH request to.
+            data (dict, optional): The data to include in the PATCH request. Defaults to None.
+
+        Returns:
+            dict: JSON response from the API.
+        """
+        return self._request('PATCH', endpoint, json=data)
+
+    def head(self, endpoint, params=None):
+        """
+        Sends a HEAD request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to send the HEAD request to.
+            params (dict, optional): URL parameters to include in the request. Defaults to None.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
+        return self._request('HEAD', endpoint, params=params)
+
+    def options(self, endpoint, params=None):
+        """
+        Sends an OPTIONS request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to send the OPTIONS request to.
+            params (dict, optional): URL parameters to include in the request. Defaults to None.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
+        return self._request('OPTIONS', endpoint, params=params)
+
 
 if __name__ == "__main__":
     # Example usage
@@ -157,5 +196,26 @@ if __name__ == "__main__":
     try:
         response = client.delete("posts/1")
         logging.info(response)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+
+    # PATCH request example
+    try:
+        response = client.patch("posts/1", data={"title": "updated title"})
+        logging.info(response)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+
+    # HEAD request example
+    try:
+        response = client.head("posts/1")
+        logging.info(response.headers)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+
+    # OPTIONS request example
+    try:
+        response = client.options("posts/1")
+        logging.info(response.headers)
     except Exception as e:
         logging.error(f"An error occurred: {e}")
