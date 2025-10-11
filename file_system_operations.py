@@ -199,13 +199,47 @@ class FileSystemTool:
             return None
         total_size = 0
         try:
-            for dirpath, dirnames, filenames in os.walk(path):
+            for dirpath, _, filenames in os.walk(path):
                 for f in filenames:
                     fp = os.path.join(dirpath, f)
                     total_size += os.path.getsize(fp)
             return total_size
         except OSError as e:
             print(f"Error getting directory size: {e}")
+            return None
+
+    @staticmethod
+    def get_file_modification_time(path: str) -> Optional[float]:
+        """
+        Get the last modification time of the file at the specified path.
+
+        :param path: The path of the file.
+        :return: Last modification time in seconds since the epoch, or None if an error occurs.
+        """
+        if not os.path.isfile(path):
+            print(f"Error: {path} is not a valid file.")
+            return None
+        try:
+            return os.path.getmtime(path)
+        except OSError as e:
+            print(f"Error getting file modification time: {e}")
+            return None
+
+    @staticmethod
+    def get_file_creation_time(path: str) -> Optional[float]:
+        """
+        Get the creation time of the file at the specified path.
+
+        :param path: The path of the file.
+        :return: Creation time in seconds since the epoch, or None if an error occurs.
+        """
+        if not os.path.isfile(path):
+            print(f"Error: {path} is not a valid file.")
+            return None
+        try:
+            return os.path.getctime(path)
+        except OSError as e:
+            print(f"Error getting file creation time: {e}")
             return None
 
 if __name__ == "__main__":
@@ -254,3 +288,11 @@ if __name__ == "__main__":
     # Get directory size
     dir_size = fs_tool.get_directory_size('/path/to/directory')
     print(f"Directory size: {dir_size} bytes")
+
+    # Get file modification time
+    mod_time = fs_tool.get_file_modification_time('/path/to/directory/file_to_check.txt')
+    print(f"File modification time: {mod_time}")
+
+    # Get file creation time
+    create_time = fs_tool.get_file_creation_time('/path/to/directory/file_to_check.txt')
+    print(f"File creation time: {create_time}")
