@@ -1,7 +1,6 @@
 import psutil
 import time
 import threading
-import os
 from datetime import datetime
 
 class SystemMonitor:
@@ -30,24 +29,26 @@ class SystemMonitor:
 
     def _log_usage(self):
         """Logs the CPU and memory usage to the specified log file."""
-        with open(self.log_file, 'a') as file:
-            while self._monitoring:
-                try:
-                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    cpu_usage = psutil.cpu_percent(interval=1)
-                    memory_info = psutil.virtual_memory()
-                    memory_usage = memory_info.percent
-                    log_entry = (f"{timestamp} | CPU: {cpu_usage}% | Memory: {memory_usage}% | "
-                                 f"Available Memory: {memory_info.available/1024**2:.2f} MB\n")
+        while self._monitoring:
+            try:
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                cpu_usage = psutil.cpu_percent(interval=None)
+                memory_info = psutil.virtual_memory()
+                memory_usage = memory_info.percent
+                log_entry = (f"{timestamp} | CPU: {cpu_usage:.2f}% | Memory: {memory_usage:.2f}% | "
+                             f"Available Memory: {memory_info.available / 1024**2:.2f} MB\n")
+                with open(self.log_file, 'a') as file:
                     file.write(log_entry)
-                    print(log_entry.strip())
-                    time.sleep(self.interval - 1)  # Adjust sleep to account for cpu_percent interval
-                except IOError as e:
-                    print(f"Error writing to log file: {e}")
-                    self._monitoring = False
-                except Exception as e:
-                    print(f"Unexpected error: {e}")
-                    self._monitoring = False
+                print(log_entry.strip())
+                time.sleep(self.interval)
+            except IOError as e:
+                print(f"Error writing to log file: {e}")
+                self._monitoring = False
+                break
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                self._monitoring = False
+                break
 
     def start(self):
         """
@@ -64,7 +65,8 @@ class SystemMonitor:
         """
         if self._monitoring:
             self._monitoring = False
-            self._thread.join()
+            if self._thread is not None:
+                self._thread.join()
 
     def status(self):
         """
@@ -79,7 +81,6 @@ if __name__ == "__main__":
     monitor = SystemMonitor(log_file='system_usage.log', interval=5)
     try:
         monitor.start()
-        # Run the monitor indefinitely or for a specific period
         while monitor.status():
             time.sleep(5)
     except KeyboardInterrupt:
