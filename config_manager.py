@@ -15,6 +15,9 @@ class ConfigManager:
     
     update_config(file_path: str, updates: Dict[str, Any]) -> None:
         Updates the configuration file with the provided updates.
+    
+    backup_config(file_path: str) -> None:
+        Creates a backup of the existing configuration file.
     """
 
     @staticmethod
@@ -41,12 +44,11 @@ class ConfigManager:
         """
         try:
             with open(file_path, 'r') as file:
-                config = json.load(file)
-            return config
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Configuration file not found: {file_path}")
-        except json.JSONDecodeError:
-            raise json.JSONDecodeError(f"Invalid JSON in configuration file: {file_path}")
+                return json.load(file)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Configuration file not found: {file_path}") from e
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(f"Invalid JSON in configuration file: {file_path}") from e
 
     @staticmethod
     def write_config(file_path: str, config: Dict[str, Any]) -> None:
@@ -68,8 +70,8 @@ class ConfigManager:
         try:
             with open(file_path, 'w') as file:
                 json.dump(config, file, indent=4)
-        except IOError:
-            raise IOError(f"Error writing to configuration file: {file_path}")
+        except IOError as e:
+            raise IOError(f"Error writing to configuration file: {file_path}") from e
 
     @staticmethod
     def update_config(file_path: str, updates: Dict[str, Any]) -> None:
@@ -99,6 +101,32 @@ class ConfigManager:
         except (FileNotFoundError, json.JSONDecodeError, IOError) as e:
             raise e
 
+    @staticmethod
+    def backup_config(file_path: str) -> None:
+        """
+        Creates a backup of the existing configuration file.
+
+        Parameters
+        ----------
+        file_path : str
+            The path to the configuration file.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the configuration file is not found.
+        IOError
+            If there is an issue writing to the backup file.
+        """
+        import shutil
+        backup_path = f"{file_path}.backup"
+        try:
+            shutil.copy(file_path, backup_path)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Configuration file not found: {file_path}") from e
+        except IOError as e:
+            raise IOError(f"Error creating backup for configuration file: {file_path}") from e
+
 if __name__ == "__main__":
     config_path = "config.json"
     
@@ -112,6 +140,10 @@ if __name__ == "__main__":
         # Read config
         config = ConfigManager.read_config(config_path)
         print("Current config:", config)
+
+        # Backup config
+        ConfigManager.backup_config(config_path)
+        print(f"Backup created: {config_path}.backup")
 
         # Update config
         ConfigManager.update_config(config_path, updates)
