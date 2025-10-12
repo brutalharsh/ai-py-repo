@@ -36,7 +36,7 @@ class APIClient:
         self.base_url = base_url
         self.headers = headers if headers else {}
         self.auth = auth
-    
+
     def _handle_response(self, response):
         """Handles the API response, raising exceptions for errors."""
         try:
@@ -86,7 +86,7 @@ class APIClient:
             params (dict): Query parameters (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('GET', endpoint, params=params)
 
@@ -99,7 +99,7 @@ class APIClient:
             data (dict): The body data (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('POST', endpoint, json=data)
 
@@ -112,7 +112,7 @@ class APIClient:
             data (dict): The body data (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('PUT', endpoint, json=data)
 
@@ -125,7 +125,7 @@ class APIClient:
             params (dict): Query parameters (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('DELETE', endpoint, params=params)
     
@@ -138,7 +138,7 @@ class APIClient:
             data (dict): The body data (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('PATCH', endpoint, json=data)
     
@@ -153,7 +153,8 @@ class APIClient:
         Returns:
             dict: The headers from the response.
         """
-        return self._request_with_retries('HEAD', endpoint, params=params)
+        response = self._request_with_retries('HEAD', endpoint, params=params)
+        return response.headers
 
     def options(self, endpoint, params=None):
         """
@@ -164,9 +165,18 @@ class APIClient:
             params (dict): Query parameters (optional).
 
         Returns:
-            dict: The JSON response.
+            Any: The JSON response or text response.
         """
         return self._request_with_retries('OPTIONS', endpoint, params=params)
+
+    def authenticate(self, auth):
+        """
+        Sets the authentication credentials for the APIClient.
+
+        Parameters:
+            auth (tuple): Authentication credentials.
+        """
+        self.auth = auth
 
 if __name__ == "__main__":
     # Example usage:
