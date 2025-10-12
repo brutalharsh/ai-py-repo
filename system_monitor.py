@@ -56,7 +56,7 @@ class SystemMonitor:
         """
         if not self._monitoring:
             self._monitoring = True
-            self._thread = threading.Thread(target=self._log_usage)
+            self._thread = threading.Thread(target=self._log_usage, daemon=True)
             self._thread.start()
 
     def stop(self):
