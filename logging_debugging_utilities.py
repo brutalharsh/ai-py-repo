@@ -1,6 +1,6 @@
 import logging
-import traceback
 from logging.handlers import RotatingFileHandler
+import traceback
 
 class Logger:
     """
@@ -70,14 +70,15 @@ class Logger:
         """Logs a critical message."""
         self._log(logging.CRITICAL, msg)
 
-    def log_exception(self, exc: Exception):
+    def log_exception(self, exc: Exception, msg: str = "Exception occurred"):
         """
         Logs an exception with the stack trace.
 
         Args:
             exc (Exception): The exception to log.
+            msg (str, optional): Additional message to log with the exception. Defaults to "Exception occurred".
         """
-        self.logger.error("Exception occurred", exc_info=True)
+        self.logger.error(f"{msg}: {exc}", exc_info=True)
 
     @staticmethod
     def set_global_log_level(level: int):
@@ -88,6 +89,20 @@ class Logger:
             level (int): The logging level to set globally.
         """
         logging.basicConfig(level=level)
+
+    def add_file_handler(self, log_file: str, max_bytes: int = 10485760, backup_count: int = 5):
+        """
+        Adds an additional file handler to the logger.
+
+        Args:
+            log_file (str): The file to log messages to.
+            max_bytes (int, optional): Maximum size in bytes of the log file before it gets rotated. Defaults to 10485760 (10MB).
+            backup_count (int, optional): Number of backup files to keep. Defaults to 5.
+        """
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler = RotatingFileHandler(log_file, maxBytes=max_bytes, backupCount=backup_count)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
 
 if __name__ == "__main__":
     # Example usage
