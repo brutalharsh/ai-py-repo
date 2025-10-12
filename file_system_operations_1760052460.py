@@ -31,17 +31,14 @@ class FileSystemUtility:
         :return: A list of filenames.
         """
         try:
-            files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-            return files
+            return [f for f in os.listdir(path) if Path(path, f).is_file()]
         except FileNotFoundError:
             print(f"Directory not found: {path}")
-            return []
         except PermissionError:
             print(f"Permission denied: Cannot list files in {path}")
-            return []
         except OSError as e:
             print(f"OS error: {e}")
-            return []
+        return []
 
     @staticmethod
     def copy_file(source, destination):
@@ -105,17 +102,14 @@ class FileSystemUtility:
         :return: The size of the file in bytes.
         """
         try:
-            size = os.path.getsize(path)
-            return size
+            return os.path.getsize(path)
         except FileNotFoundError:
             print(f"File not found: {path}")
-            return 0
         except PermissionError:
             print(f"Permission denied: Cannot get size of file: {path}")
-            return 0
         except OSError as e:
             print(f"OS error: {e}")
-            return 0
+        return 0
 
     @staticmethod
     def create_file(path, content=""):
@@ -126,13 +120,50 @@ class FileSystemUtility:
         :param content: The content to write to the file.
         """
         try:
-            with open(path, 'w') as file:
+            with open(path, 'w', encoding='utf-8') as file:
                 file.write(content)
             print(f"File created at: {path}")
         except PermissionError:
             print(f"Permission denied: Cannot create file at {path}")
         except OSError as e:
             print(f"OS error: {e}")
+
+    @staticmethod
+    def read_file(path):
+        """
+        Read the content of the specified file.
+        
+        :param path: The path to the file.
+        :return: The content of the file.
+        """
+        try:
+            with open(path, 'r', encoding='utf-8') as file:
+                return file.read()
+        except FileNotFoundError:
+            print(f"File not found: {path}")
+        except PermissionError:
+            print(f"Permission denied: Cannot read file: {path}")
+        except OSError as e:
+            print(f"OS error: {e}")
+        return ""
+
+    @staticmethod
+    def list_directories(path):
+        """
+        List all directories in the specified path.
+        
+        :param path: The path to the directory.
+        :return: A list of directory names.
+        """
+        try:
+            return [d for d in os.listdir(path) if Path(path, d).is_dir()]
+        except FileNotFoundError:
+            print(f"Directory not found: {path}")
+        except PermissionError:
+            print(f"Permission denied: Cannot list directories in {path}")
+        except OSError as e:
+            print(f"OS error: {e}")
+        return []
 
 if __name__ == "__main__":
     # Example usage
@@ -151,3 +182,9 @@ if __name__ == "__main__":
     print(f"Size: {size} bytes")
 
     FileSystemUtility.create_file('/path/to/new_file.txt', 'Hello, World!')
+
+    content = FileSystemUtility.read_file('/path/to/new_file.txt')
+    print(f"Content: {content}")
+
+    directories = FileSystemUtility.list_directories('/path/to/')
+    print(directories)
